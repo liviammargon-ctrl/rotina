@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Meu Dia">
+<meta name="theme-color" content="#185FA5">
+<title>Meu Dia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F7F6F2;--surface:#FFFFFF;--surface2:#F1EFE8;--border:#D3D1C7;--border2:#B4B2A9;
+  --text:#2C2C2A;--text2:#5F5E5A;--text3:#888780;
+  --blue:#185FA5;--blue-bg:#E6F1FB;--blue-border:#B5D4F4;
+  --amber:#854F0B;--amber-bg:#FAEEDA;--amber-border:#FAC775;
+  --teal:#0F6E56;--teal-bg:#E1F5EE;--teal-border:#9FE1CB;
+  --red:#A32D2D;--red-bg:#FCEBEB;--red-border:#F7C1C1;
+  --purple:#534AB7;--purple-bg:#EEEDFE;--purple-border:#CECBF6;
+  --green:#3B6D11;--green-bg:#EAF3DE;--green-border:#C0DD97;
+  --coral:#993C1D;--coral-bg:#FAECE7;--coral-border:#F5C4B3;
+  --radius:12px;--radius-sm:8px;
+}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:15px;}
+.app{max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;}
+
+/* NAV */
+.nav{background:var(--surface);border-bottom:1px solid var(--border);padding:12px 16px 0;flex-shrink:0;padding-top:max(12px,env(safe-area-inset-top));}
+.nav-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.nav-date{font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;}
+.nav-title{font-size:18px;font-weight:600;}
+.nav-tabs{display:flex;gap:4px;}
+.tab{padding:8px 14px;font-size:13px;font-weight:500;border:none;background:transparent;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+
+/* SCROLL AREA */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:max(90px,calc(80px + env(safe-area-inset-bottom)));}
+
+/* VIEWS */
+.view{display:none;padding:16px;}
+.view.active{display:block;}
+
+/* KANBAN */
+.kanban{display:flex;flex-direction:column;gap:12px;}
+.col{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.col-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-bottom:1px solid var(--border);}
+.col-title{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;}
+.col-dot{width:8px;height:8px;border-radius:50%;}
+.col-count{font-size:11px;background:var(--surface2);color:var(--text3);padding:2px 7px;border-radius:20px;}
+.col-add{width:28px;height:28px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.col-add:hover{background:var(--surface2);}
+.col-body{padding:8px;}
+.col-body.empty{padding:16px;text-align:center;color:var(--text3);font-size:13px;}
+.task{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:6px;transition:all .12s;}
+.task:last-child{margin-bottom:0;}
+.task.done{opacity:.5;}
+.task.done .task-name{text-decoration:line-through;}
+.task-top{display:flex;align-items:flex-start;gap:8px;}
+.task-check{width:18px;height:18px;border-radius:5px;border:1.5px solid var(--border);flex-shrink:0;margin-top:1px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.task-check.checked{background:var(--teal);border-color:var(--teal);color:#fff;}
+.task-name{font-size:14px;font-weight:500;flex:1;line-height:1.4;}
+.task-meta{display:flex;align-items:center;gap:6px;margin-top:6px;margin-left:26px;flex-wrap:wrap;}
+.task-time{font-size:12px;color:var(--blue);background:var(--blue-bg);padding:2px 7px;border-radius:20px;font-family:'DM Mono',monospace;}
+.task-tag{font-size:11px;padding:2px 7px;border-radius:20px;font-weight:500;}
+.tag-reuniao{background:var(--purple-bg);color:var(--purple);}
+.tag-projeto{background:var(--blue-bg);color:var(--blue);}
+.tag-rotina{background:var(--teal-bg);color:var(--teal);}
+.tag-email{background:var(--amber-bg);color:var(--amber);}
+.tag-facul{background:var(--green-bg);color:var(--green);}
+.tag-pessoal{background:var(--coral-bg);color:var(--coral);}
+.task-repeat{font-size:11px;color:var(--text3);}
+.task-actions{display:flex;gap:4px;margin-top:8px;margin-left:26px;}
+.task-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:3px;font-family:'DM Sans',sans-serif;}
+.task-btn:active{background:var(--surface2);}
+.task-btn i{font-size:12px;}
+
+/* WEEK */
+.week-grid{display:flex;flex-direction:column;gap:12px;}
+.week-day{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;}
+.week-day-header{padding:10px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.week-day-name{font-size:13px;font-weight:600;}
+.week-day-date{font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;}
+.week-day.today .week-day-header{background:var(--blue-bg);}
+.week-day.today .week-day-name{color:var(--blue);}
+.week-tasks{padding:8px;}
+.week-task-item{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:6px;font-size:13px;}
+
+/* FUTURE / CALENDAR */
+.future-view{padding:16px;}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.cal-month{font-size:17px;font-weight:600;}
+.cal-nav{width:36px;height:36px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text2);}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;}
+.cal-dow{text-align:center;font-size:11px;font-weight:600;color:var(--text3);padding:4px 0 8px;letter-spacing:.3px;}
+.cal-cell{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:background .1s;}
+.cal-cell.empty{cursor:default;}
+.cal-cell:not(.empty):active{background:var(--surface2);}
+.cal-cell.today .cal-num{background:var(--blue);color:#fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;}
+.cal-cell.selected{background:var(--blue-bg);}
+.cal-num{font-size:13px;font-weight:500;line-height:1;}
+.cal-cell.other-month .cal-num{color:var(--text3);}
+.cal-dots{display:flex;gap:3px;margin-top:3px;min-height:6px;align-items:center;justify-content:center;}
+.cal-dot{width:5px;height:5px;border-radius:50%;}
+.dot-work{background:var(--blue);}
+.dot-personal{background:var(--coral);}
+.dot-facul{background:var(--green);}
+.cal-legend{display:flex;gap:14px;margin:10px 0 16px;padding:0 2px;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text2);}
+.legend-dot{width:7px;height:7px;border-radius:50%;}
+.day-panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-top:4px;}
+.day-panel-header{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+.day-panel-title{font-size:15px;font-weight:600;}
+.day-panel-sub{font-size:12px;color:var(--text3);}
+.day-panel-close{width:28px;height:28px;border:none;background:var(--surface2);border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--text2);}
+.day-tasks{padding:8px;}
+.day-empty{padding:20px;text-align:center;color:var(--text3);font-size:13px;}
+.day-task-row{display:flex;align-items:flex-start;gap:10px;padding:9px 10px;border-radius:var(--radius-sm);margin-bottom:4px;border:1px solid var(--border);}
+.day-task-row:last-child{margin-bottom:0;}
+.day-task-info{flex:1;}
+.day-task-name{font-size:14px;font-weight:500;}
+.day-task-meta{display:flex;gap:6px;margin-top:4px;align-items:center;}
+.day-task-delete{border:none;background:transparent;color:var(--text3);cursor:pointer;padding:2px;font-size:16px;}
+.day-section{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:.5px;text-transform:uppercase;padding:10px 10px 4px;}
+.day-add-btn{display:flex;align-items:center;gap:8px;padding:12px 10px;font-size:13px;color:var(--blue);cursor:pointer;font-weight:500;border:none;background:transparent;width:100%;font-family:'DM Sans',sans-serif;}
+.future-add-btn{width:100%;padding:12px;background:var(--surface);border:1.5px dashed var(--border);border-radius:var(--radius);color:var(--blue);font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;font-family:'DM Sans',sans-serif;}
+
+/* MODALS */
+.overlay{position:fixed;inset:0;background:rgba(44,44,42,.45);z-index:200;display:none;align-items:flex-end;justify-content:center;}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:20px 20px max(40px,calc(20px + env(safe-area-inset-bottom)));max-height:85vh;overflow-y:auto;position:relative;}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:16px;}
+.modal-field{margin-bottom:14px;}
+.modal-label{font-size:12px;color:var(--text3);margin-bottom:5px;display:block;}
+.modal-input{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:14px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface);outline:none;}
+.modal-input:focus{border-color:var(--blue);}
+.modal-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.modal-tags{display:flex;flex-wrap:wrap;gap:6px;}
+.modal-tag-btn{padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:transparent;font-size:13px;cursor:pointer;transition:all .12s;font-family:'DM Sans',sans-serif;}
+.modal-tag-btn.sel-reuniao{background:var(--purple-bg);border-color:var(--purple);color:var(--purple);}
+.modal-tag-btn.sel-projeto{background:var(--blue-bg);border-color:var(--blue);color:var(--blue);}
+.modal-tag-btn.sel-rotina{background:var(--teal-bg);border-color:var(--teal);color:var(--teal);}
+.modal-tag-btn.sel-email{background:var(--amber-bg);border-color:var(--amber);color:var(--amber);}
+.modal-tag-btn.sel-facul{background:var(--green-bg);border-color:var(--green);color:var(--green);}
+.modal-tag-btn.sel-pessoal{background:var(--coral-bg);border-color:var(--coral);color:var(--coral);}
+.modal-save{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;cursor:pointer;margin-top:4px;font-family:'DM Sans',sans-serif;}
+.modal-close{position:absolute;top:16px;right:16px;background:var(--surface2);border:none;border-radius:50%;width:32px;height:32px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--text2);}
+
+/* MOVE */
+.move-modal{position:fixed;inset:0;background:rgba(44,44,42,.4);z-index:300;display:none;align-items:flex-end;justify-content:center;}
+.move-modal.open{display:flex;}
+.move-sheet{background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:430px;padding:20px 20px max(40px,calc(20px + env(safe-area-inset-bottom)));}
+.move-option{display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid var(--border);cursor:pointer;font-size:15px;}
+.move-option:last-child{border-bottom:none;}
+
+/* FAB */
+.fab{position:fixed;bottom:max(28px,calc(20px + env(safe-area-inset-bottom)));right:50%;transform:translateX(185px);background:var(--blue);color:#fff;width:54px;height:54px;border-radius:50%;border:none;font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 18px rgba(24,95,165,.4);z-index:150;}
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="nav">
+    <div class="nav-top">
+      <div>
+        <div class="nav-date" id="nav-date"></div>
+        <div class="nav-title">Meu Dia</div>
+      </div>
+      <i class="ti ti-bell" style="font-size:20px;color:var(--text3)" aria-hidden="true"></i>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab active" onclick="switchTab('hoje',this)">Hoje</button>
+      <button class="tab" onclick="switchTab('semana',this)">Semana</button>
+      <button class="tab" onclick="switchTab('futuro',this)">Futuro</button>
+    </div>
+  </nav>
+
+  <div class="scroll-area">
+    <div class="view active" id="tab-hoje">
+      <div class="kanban" id="kanban"></div>
+    </div>
+    <div class="view" id="tab-semana">
+      <div class="week-grid" id="week-grid"></div>
+    </div>
+    <div class="view" id="tab-futuro">
+      <div class="future-view">
+        <div class="cal-header">
+          <button class="cal-nav" onclick="changeMonth(-1)" aria-label="Mês anterior"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+          <div class="cal-month" id="cal-month-label"></div>
+          <button class="cal-nav" onclick="changeMonth(1)" aria-label="Próximo mês"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+        </div>
+        <div class="cal-legend">
+          <div class="legend-item"><div class="legend-dot dot-work"></div>Trabalho</div>
+          <div class="legend-item"><div class="legend-dot dot-facul"></div>Faculdade</div>
+          <div class="legend-item"><div class="legend-dot dot-personal"></div>Pessoal</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="day-panel" id="day-panel" style="display:none">
+          <div class="day-panel-header">
+            <div>
+              <div class="day-panel-title" id="day-panel-title"></div>
+              <div class="day-panel-sub" id="day-panel-sub"></div>
+            </div>
+            <button class="day-panel-close" onclick="closeDayPanel()" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button>
+          </div>
+          <div id="day-panel-body"></div>
+        </div>
+        <button class="future-add-btn" onclick="openFutureModal()">
+          <i class="ti ti-plus" aria-hidden="true"></i> Adicionar tarefa futura
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<button class="fab" onclick="openTaskModal()" aria-label="Adicionar tarefa"><i class="ti ti-plus" aria-hidden="true"></i></button>
+
+<!-- ADD TODAY -->
+<div class="overlay" id="task-overlay" onclick="closeTaskModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeTaskModal()" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button>
+    <div class="modal-title">Nova tarefa</div>
+    <div class="modal-field">
+      <label class="modal-label">Tarefa</label>
+      <input class="modal-input" id="t-name" placeholder="O que precisa ser feito?" />
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Tipo</label>
+      <div class="modal-tags" id="today-tags">
+        <button class="modal-tag-btn" onclick="selTodayTag('reuniao',this)">Reunião</button>
+        <button class="modal-tag-btn" onclick="selTodayTag('projeto',this)">Projeto</button>
+        <button class="modal-tag-btn" onclick="selTodayTag('rotina',this)">Rotina</button>
+        <button class="modal-tag-btn" onclick="selTodayTag('email',this)">Email</button>
+        <button class="modal-tag-btn" onclick="selTodayTag('facul',this)">Faculdade</button>
+        <button class="modal-tag-btn" onclick="selTodayTag('pessoal',this)">Pessoal</button>
+      </div>
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label class="modal-label">Horário (opcional)</label>
+        <input class="modal-input" type="time" id="t-time" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Coluna</label>
+        <select class="modal-input" id="t-col">
+          <option value="reunioes">Reuniões</option>
+          <option value="hoje" selected>Tarefas do dia</option>
+          <option value="extras">Extras</option>
+          <option value="amanha">Amanhã</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Repetição</label>
+      <select class="modal-input" id="t-repeat">
+        <option value="">Sem repetição</option>
+        <option value="diario">Todo dia útil</option>
+        <option value="semana">Semanal</option>
+      </select>
+    </div>
+    <button class="modal-save" onclick="saveTodayTask()">Salvar tarefa</button>
+  </div>
+</div>
+
+<!-- ADD FUTURE -->
+<div class="overlay" id="future-overlay" onclick="closeFutureModal(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <button class="modal-close" onclick="closeFutureModal()" aria-label="Fechar"><i class="ti ti-x" aria-hidden="true"></i></button>
+    <div class="modal-title" id="future-modal-title">Tarefa futura</div>
+    <div class="modal-field">
+      <label class="modal-label">Tarefa</label>
+      <input class="modal-input" id="f-name" placeholder="Descreva a tarefa..." />
+    </div>
+    <div class="modal-row">
+      <div class="modal-field">
+        <label class="modal-label">Data</label>
+        <input class="modal-input" type="date" id="f-date" />
+      </div>
+      <div class="modal-field">
+        <label class="modal-label">Horário (opcional)</label>
+        <input class="modal-input" type="time" id="f-time" />
+      </div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Categoria</label>
+      <div class="modal-tags" id="future-tags">
+        <button class="modal-tag-btn" onclick="selFTag('reuniao',this)">Reunião</button>
+        <button class="modal-tag-btn" onclick="selFTag('projeto',this)">Projeto</button>
+        <button class="modal-tag-btn" onclick="selFTag('facul',this)">Faculdade</button>
+        <button class="modal-tag-btn" onclick="selFTag('pessoal',this)">Pessoal</button>
+        <button class="modal-tag-btn" onclick="selFTag('email',this)">Email</button>
+      </div>
+    </div>
+    <button class="modal-save" onclick="saveFutureTask()">Salvar</button>
+  </div>
+</div>
+
+<!-- MOVE -->
+<div class="move-modal" id="move-modal" onclick="closeMoveModal(event)">
+  <div class="move-sheet">
+    <div class="modal-handle"></div>
+    <div class="move-option" onclick="moveTask('reunioes')"><i class="ti ti-users" style="color:var(--purple)" aria-hidden="true"></i> Reuniões</div>
+    <div class="move-option" onclick="moveTask('hoje')"><i class="ti ti-sun" style="color:var(--amber)" aria-hidden="true"></i> Tarefas do dia</div>
+    <div class="move-option" onclick="moveTask('extras')"><i class="ti ti-bolt" style="color:var(--red)" aria-hidden="true"></i> Extras do dia</div>
+    <div class="move-option" onclick="moveTask('amanha')"><i class="ti ti-arrow-right" style="color:var(--teal)" aria-hidden="true"></i> Para amanhã</div>
+  </div>
+</div>
+
+<script>
+const TAGS={reuniao:'Reunião',projeto:'Projeto',rotina:'Rotina',email:'Email',facul:'Faculdade',pessoal:'Pessoal'};
+const COLS={
+  reunioes:{label:'Reuniões',dot:'#534AB7',empty:'Nenhuma reunião hoje'},
+  hoje:{label:'Tarefas do dia',dot:'#185FA5',empty:'Adicione suas tarefas'},
+  extras:{label:'Extras do dia',dot:'#A32D2D',empty:'Surgiu algo? Adicione aqui'},
+  amanha:{label:'Para amanhã',dot:'#0F6E56',empty:'Nada adiado ainda'}
+};
+const MONTHS=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const WEEKDAYS=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+const DAYNAMES=['domingo','segunda-feira','terça-feira','quarta-feira','quinta-feira','sexta-feira','sábado'];
+
+const DEFAULT_TASKS={
+  reunioes:[
+    {id:1,name:'Daily stand-up PMO',tag:'reuniao',time:'08:00',done:false,repeat:'diario'},
+    {id:2,name:'Alinhamento Vale — coletores de pó',tag:'reuniao',time:'10:30',done:false,repeat:''},
+  ],
+  hoje:[
+    {id:3,name:'Atualizar portfólio de projetos',tag:'projeto',time:'',done:false,repeat:'diario'},
+    {id:4,name:'Responder e-mails pendentes',tag:'email',time:'',done:false,repeat:'diario'},
+    {id:5,name:'Estudar 5S / melhoria contínua',tag:'rotina',time:'12:00',done:false,repeat:'diario'},
+  ],
+  extras:[],
+  amanha:[]
+};
+
+const now=new Date();
+let calYear=now.getFullYear();
+let calMonth=now.getMonth();
+let selectedDay=null;
+let nextId=200;
+let selectedTodayTag='';
+let selectedFTag='';
+let movingId=null;
+let movingFrom=null;
+let currentTab='hoje';
+
+// ---- STORAGE ----
+function todayKey(){
+  return now.getFullYear()+'-'+pad(now.getMonth()+1)+'-'+pad(now.getDate());
+}
+function loadTodayTasks(){
+  const key='tasks_'+todayKey();
+  const saved=localStorage.getItem(key);
+  if(saved){
+    try{return JSON.parse(saved);}catch(e){}
+  }
+  // First time today: start from defaults, carry over recurring from yesterday
+  const base=JSON.parse(JSON.stringify(DEFAULT_TASKS));
+  const yKey='tasks_'+yesterdayKey();
+  const yesterday=localStorage.getItem(yKey);
+  if(yesterday){
+    try{
+      const y=JSON.parse(yesterday);
+      // carry amanha to hoje
+      if(y.amanha&&y.amanha.length){
+        y.amanha.forEach(t=>{t.done=false;base.hoje.push(t);});
+      }
+    }catch(e){}
+  }
+  return base;
+}
+function saveTodayTasksToStorage(){
+  localStorage.setItem('tasks_'+todayKey(),JSON.stringify(todayTasks));
+}
+function loadFutureTasks(){
+  const saved=localStorage.getItem('future_tasks');
+  if(saved){try{return JSON.parse(saved);}catch(e){}}
+  return {
+    '2026-06-02':[{id:90,name:'Entrega relatório PMO',tag:'projeto',time:''}],
+    '2026-06-10':[{id:91,name:'Prova — Eng. de Materiais',tag:'facul',time:'09:00'}],
+    '2026-06-15':[{id:92,name:'Consulta médica',tag:'pessoal',time:'14:30'},{id:93,name:'Revisão orçamento Vale',tag:'projeto',time:''}],
+    '2026-06-20':[{id:94,name:'Entrega trabalho UVV',tag:'facul',time:'23:59'}],
+    '2026-06-28':[{id:95,name:'Churrasco família',tag:'pessoal',time:''}],
+  };
+}
+function saveFutureTasksToStorage(){
+  localStorage.setItem('future_tasks',JSON.stringify(futureTasks));
+}
+function pad(n){return String(n).padStart(2,'0');}
+function yesterdayKey(){
+  const y=new Date(now);y.setDate(y.getDate()-1);
+  return y.getFullYear()+'-'+pad(y.getMonth()+1)+'-'+pad(y.getDate());
+}
+function dateKey(y,m,d){return y+'-'+pad(m+1)+'-'+pad(d);}
+
+let todayTasks=loadTodayTasks();
+let futureTasks=loadFutureTasks();
+
+// sync nextId
+[...Object.values(todayTasks).flat(),...Object.values(futureTasks).flat()].forEach(t=>{if(t.id>=nextId)nextId=t.id+1;});
+
+// ---- NAV DATE ----
+function setNavDate(){
+  const ms=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  document.getElementById('nav-date').textContent=DAYNAMES[now.getDay()]+', '+now.getDate()+' de '+ms[now.getMonth()];
+}
+
+// ---- TABS ----
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
+  currentTab=tab;
+  if(tab==='hoje') renderKanban();
+  if(tab==='semana') renderWeek();
+  if(tab==='futuro') renderCalendar();
+}
+
+// ---- KANBAN ----
+function renderKanban(){
+  const k=document.getElementById('kanban');k.innerHTML='';
+  for(const[colId,col]of Object.entries(COLS)){
+    const list=todayTasks[colId];
+    const cnt=list.filter(t=>!t.done).length;
+    const d=document.createElement('div');d.className='col';
+    d.innerHTML=`<div class="col-header">
+      <div class="col-title"><div class="col-dot" style="background:${col.dot}"></div>${col.label}</div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="col-count">${cnt}</span>
+        <button class="col-add" onclick="openTaskModalForCol('${colId}')" aria-label="Adicionar"><i class="ti ti-plus" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="col-body${list.length===0?' empty':''}" id="col-${colId}">
+      ${list.length===0?col.empty:list.map(t=>taskCard(t,colId)).join('')}
+    </div>`;
+    k.appendChild(d);
+  }
+}
+function taskCard(t,colId){
+  return`<div class="task${t.done?' done':''}" id="task-${t.id}">
+    <div class="task-top">
+      <div class="task-check${t.done?' checked':''}" onclick="toggleTask(${t.id},'${colId}')" role="checkbox" aria-checked="${t.done}">
+        ${t.done?'<i class="ti ti-check" style="font-size:12px" aria-hidden="true"></i>':''}
+      </div>
+      <span class="task-name">${t.name}</span>
+    </div>
+    <div class="task-meta">
+      ${t.time?`<span class="task-time"><i class="ti ti-clock" style="font-size:11px" aria-hidden="true"></i> ${t.time}</span>`:''}
+      ${t.tag?`<span class="task-tag tag-${t.tag}">${TAGS[t.tag]}</span>`:''}
+      ${t.repeat?`<span class="task-repeat"><i class="ti ti-repeat" style="font-size:11px" aria-hidden="true"></i> recorrente</span>`:''}
+    </div>
+    <div class="task-actions">
+      <button class="task-btn" onclick="openMoveModal(${t.id},'${colId}')"><i class="ti ti-arrows-move" aria-hidden="true"></i> Mover</button>
+      <button class="task-btn" onclick="deleteToday(${t.id},'${colId}')"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>
+  </div>`;
+}
+function toggleTask(id,col){
+  const t=todayTasks[col].find(x=>x.id===id);
+  if(t){t.done=!t.done;saveTodayTasksToStorage();renderKanban();}
+}
+function deleteToday(id,col){
+  todayTasks[col]=todayTasks[col].filter(x=>x.id!==id);
+  saveTodayTasksToStorage();renderKanban();
+}
+function openMoveModal(id,col){movingId=id;movingFrom=col;document.getElementById('move-modal').classList.add('open');}
+function closeMoveModal(e){if(!e||e.target===document.getElementById('move-modal'))document.getElementById('move-modal').classList.remove('open');}
+function moveTask(to){
+  const t=todayTasks[movingFrom].find(x=>x.id===movingId);
+  if(t){todayTasks[movingFrom]=todayTasks[movingFrom].filter(x=>x.id!==movingId);todayTasks[to].push(t);}
+  document.getElementById('move-modal').classList.remove('open');
+  saveTodayTasksToStorage();renderKanban();
+}
+
+// ---- WEEK ----
+function renderWeek(){
+  const g=document.getElementById('week-grid');g.innerHTML='';
+  const td=new Date(now);const ti=td.getDay();
+  for(let i=0;i<7;i++){
+    const d=new Date(td);d.setDate(td.getDate()-ti+i);
+    const isToday=i===ti;
+    const dt=d.getDate()+'/'+(d.getMonth()+1);
+    const allT=isToday
+      ?[...todayTasks.reunioes,...todayTasks.hoje,...todayTasks.extras]
+      :[...todayTasks.reunioes,...todayTasks.hoje].filter(t=>t.repeat==='diario');
+    const div=document.createElement('div');div.className='week-day'+(isToday?' today':'');
+    div.innerHTML=`<div class="week-day-header">
+      <span class="week-day-name">${isToday?'Hoje · ':''+(WEEKDAYS[i])}</span>
+      <span class="week-day-date">${dt}</span>
+    </div>
+    <div class="week-tasks">
+      ${allT.length===0?'<p style="font-size:13px;color:var(--text3);padding:8px 4px">Sem tarefas</p>':
+        allT.slice(0,4).map(t=>`<div class="week-task-item">
+          <div style="width:6px;height:6px;border-radius:50%;background:${t.tag==='reuniao'?'#534AB7':t.tag==='facul'?'#3B6D11':'#185FA5'};flex-shrink:0"></div>
+          <span style="flex:1;font-size:13px">${t.name}</span>
+          ${t.time?`<span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${t.time}</span>`:''}
+        </div>`).join('')}
+      ${allT.length>4?`<p style="font-size:12px;color:var(--text3);padding:4px 8px">+${allT.length-4} mais</p>`:''}
+    </div>`;
+    g.appendChild(div);
+  }
+}
+
+// ---- CALENDAR ----
+function tagCategory(tag){
+  if(tag==='pessoal') return 'personal';
+  if(tag==='facul') return 'facul';
+  return 'work';
+}
+function renderCalendar(){
+  document.getElementById('cal-month-label').textContent=MONTHS[calMonth]+' '+calYear;
+  const g=document.getElementById('cal-grid');g.innerHTML='';
+  WEEKDAYS.forEach(d=>{const el=document.createElement('div');el.className='cal-dow';el.textContent=d;g.appendChild(el);});
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+  const todayStr=dateKey(now.getFullYear(),now.getMonth(),now.getDate());
+  for(let i=0;i<firstDay;i++) g.appendChild(makeCell(calYear,calMonth-1,daysInPrev-firstDay+1+i,true,todayStr));
+  for(let d=1;d<=daysInMonth;d++) g.appendChild(makeCell(calYear,calMonth,d,false,todayStr));
+  const total=firstDay+daysInMonth;const rem=total%7===0?0:7-(total%7);
+  for(let d=1;d<=rem;d++) g.appendChild(makeCell(calYear,calMonth+1,d,true,todayStr));
+  if(selectedDay){
+    const[sy,sm]=selectedDay.split('-').map(Number);
+    if(sy===calYear&&sm-1===calMonth){
+      const el=document.querySelector(`.cal-cell[data-key="${selectedDay}"]`);
+      if(el) el.classList.add('selected');
+    } else closeDayPanel();
+  }
+}
+function makeCell(y,m,d,otherMonth,todayStr){
+  const realM=((m%12)+12)%12;
+  const realY=m<0?y-1:m>11?y+1:y;
+  const key=dateKey(realY,realM,d);
+  const tasks=futureTasks[key]||[];
+  const hasWork=tasks.some(t=>tagCategory(t.tag)==='work');
+  const hasFacul=tasks.some(t=>tagCategory(t.tag)==='facul');
+  const hasPersonal=tasks.some(t=>tagCategory(t.tag)==='personal');
+  const isToday=key===todayStr;
+  const cell=document.createElement('div');
+  cell.className='cal-cell'+(otherMonth?' other-month':'')+(isToday?' today':'');
+  cell.dataset.key=key;
+  if(!otherMonth) cell.onclick=()=>selectDay(key,cell);
+  else cell.style.cursor='default';
+  cell.innerHTML=`<div class="cal-num">${d}</div>
+    <div class="cal-dots">
+      ${hasWork?'<div class="cal-dot dot-work"></div>':''}
+      ${hasFacul?'<div class="cal-dot dot-facul"></div>':''}
+      ${hasPersonal?'<div class="cal-dot dot-personal"></div>':''}
+    </div>`;
+  return cell;
+}
+function changeMonth(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  renderCalendar();
+}
+function selectDay(key,cellEl){
+  document.querySelectorAll('.cal-cell.selected').forEach(c=>c.classList.remove('selected'));
+  if(selectedDay===key){selectedDay=null;document.getElementById('day-panel').style.display='none';return;}
+  selectedDay=key;cellEl.classList.add('selected');
+  renderDayPanel(key);
+  document.getElementById('day-panel').style.display='block';
+  setTimeout(()=>document.getElementById('day-panel').scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+function renderDayPanel(key){
+  const[y,m,d]=key.split('-').map(Number);
+  const date=new Date(y,m-1,d);
+  document.getElementById('day-panel-title').textContent=d+' de '+MONTHS[m-1]+' '+y;
+  document.getElementById('day-panel-sub').textContent=DAYNAMES[date.getDay()];
+  const tasks=(futureTasks[key]||[]).slice().sort((a,b)=>(a.time||'99:99').localeCompare(b.time||'99:99'));
+  const work=tasks.filter(t=>tagCategory(t.tag)==='work');
+  const facul=tasks.filter(t=>tagCategory(t.tag)==='facul');
+  const personal=tasks.filter(t=>tagCategory(t.tag)==='personal');
+  let html='';
+  if(tasks.length===0){
+    html='<div class="day-empty"><i class="ti ti-sun" style="font-size:28px;display:block;margin-bottom:8px" aria-hidden="true"></i>Dia livre — nada agendado</div>';
+  } else {
+    if(work.length>0){html+=`<div class="day-section"><i class="ti ti-briefcase" style="font-size:11px" aria-hidden="true"></i> Trabalho</div><div style="padding:0 8px 4px">${work.map(t=>dayTaskRow(t,key)).join('')}</div>`;}
+    if(facul.length>0){html+=`<div class="day-section"><i class="ti ti-school" style="font-size:11px" aria-hidden="true"></i> Faculdade</div><div style="padding:0 8px 4px">${facul.map(t=>dayTaskRow(t,key)).join('')}</div>`;}
+    if(personal.length>0){html+=`<div class="day-section"><i class="ti ti-heart" style="font-size:11px" aria-hidden="true"></i> Pessoal</div><div style="padding:0 8px 4px">${personal.map(t=>dayTaskRow(t,key)).join('')}</div>`;}
+  }
+  html+=`<button class="day-add-btn" onclick="openFutureModalForDay('${key}')"><i class="ti ti-plus" aria-hidden="true"></i> Adicionar neste dia</button>`;
+  document.getElementById('day-panel-body').innerHTML=html;
+}
+function dayTaskRow(t,key){
+  return`<div class="day-task-row">
+    <div class="day-task-info">
+      <div class="day-task-name">${t.name}</div>
+      <div class="day-task-meta">
+        ${t.time?`<span class="task-time"><i class="ti ti-clock" style="font-size:10px" aria-hidden="true"></i> ${t.time}</span>`:''}
+        ${t.tag?`<span class="task-tag tag-${t.tag}">${TAGS[t.tag]}</span>`:''}
+      </div>
+    </div>
+    <button class="day-task-delete" onclick="deleteFutureTask('${key}',${t.id})" aria-label="Excluir"><i class="ti ti-trash" aria-hidden="true"></i></button>
+  </div>`;
+}
+function deleteFutureTask(key,id){
+  if(!futureTasks[key]) return;
+  futureTasks[key]=futureTasks[key].filter(t=>t.id!==id);
+  if(futureTasks[key].length===0) delete futureTasks[key];
+  saveFutureTasksToStorage();renderCalendar();
+  if(selectedDay===key) renderDayPanel(key);
+}
+function closeDayPanel(){
+  selectedDay=null;
+  document.querySelectorAll('.cal-cell.selected').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('day-panel').style.display='none';
+}
+
+// ---- FUTURE MODAL ----
+function openFutureModal(){
+  document.getElementById('future-modal-title').textContent='Tarefa futura';
+  document.getElementById('f-date').value='';
+  resetFModal();
+  document.getElementById('future-overlay').classList.add('open');
+}
+function openFutureModalForDay(key){
+  document.getElementById('future-modal-title').textContent='Adicionar em '+formatKey(key);
+  document.getElementById('f-date').value=key;
+  resetFModal();
+  document.getElementById('future-overlay').classList.add('open');
+}
+function resetFModal(){
+  document.getElementById('f-name').value='';
+  document.getElementById('f-time').value='';
+  selectedFTag='';
+  document.querySelectorAll('#future-tags .modal-tag-btn').forEach(b=>b.className='modal-tag-btn');
+}
+function closeFutureModal(e){
+  if(!e||e.target===document.getElementById('future-overlay'))
+    document.getElementById('future-overlay').classList.remove('open');
+}
+function selFTag(tag,btn){
+  selectedFTag=selectedFTag===tag?'':tag;
+  document.querySelectorAll('#future-tags .modal-tag-btn').forEach(b=>b.className='modal-tag-btn');
+  if(selectedFTag) btn.className='modal-tag-btn sel-'+selectedFTag;
+}
+function saveFutureTask(){
+  const name=document.getElementById('f-name').value.trim();
+  const date=document.getElementById('f-date').value;
+  if(!name||!date) return;
+  const time=document.getElementById('f-time').value;
+  if(!futureTasks[date]) futureTasks[date]=[];
+  futureTasks[date].push({id:nextId++,name,tag:selectedFTag,time});
+  saveFutureTasksToStorage();
+  document.getElementById('future-overlay').classList.remove('open');
+  renderCalendar();
+  if(selectedDay===date) renderDayPanel(date);
+  else{const cell=document.querySelector(`.cal-cell[data-key="${date}"]`);if(cell) selectDay(date,cell);}
+}
+function formatKey(key){
+  const[y,m,d]=key.split('-');
+  const ms=['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+  return parseInt(d)+' de '+ms[parseInt(m)-1];
+}
+
+// ---- TODAY TASK MODAL ----
+function openTaskModal(){
+  document.getElementById('task-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('t-name').focus(),100);
+}
+function openTaskModalForCol(col){document.getElementById('t-col').value=col;openTaskModal();}
+function closeTaskModal(e){
+  if(!e||e.target===document.getElementById('task-overlay')){
+    document.getElementById('task-overlay').classList.remove('open');
+    document.getElementById('t-name').value='';
+    document.getElementById('t-time').value='';
+    document.getElementById('t-repeat').value='';
+    selectedTodayTag='';
+    document.querySelectorAll('#today-tags .modal-tag-btn').forEach(b=>b.className='modal-tag-btn');
+  }
+}
+function selTodayTag(tag,btn){
+  selectedTodayTag=selectedTodayTag===tag?'':tag;
+  document.querySelectorAll('#today-tags .modal-tag-btn').forEach(b=>b.className='modal-tag-btn');
+  if(selectedTodayTag) btn.className='modal-tag-btn sel-'+selectedTodayTag;
+}
+function saveTodayTask(){
+  const name=document.getElementById('t-name').value.trim();if(!name)return;
+  const col=document.getElementById('t-col').value;
+  const time=document.getElementById('t-time').value;
+  const repeat=document.getElementById('t-repeat').value;
+  todayTasks[col].push({id:nextId++,name,tag:selectedTodayTag,time,done:false,repeat});
+  saveTodayTasksToStorage();closeTaskModal();renderKanban();
+}
+
+// ---- INIT ----
+setNavDate();
+renderKanban();
+</script>
+</body>
+</html>
